@@ -1,16 +1,16 @@
 <?
 $g_page_id = "0|1";
-// у раздела сделаю свои вопросы в окне помощи
+// Сѓ СЂР°Р·РґРµР»Р° СЃРґРµР»Р°СЋ СЃРІРѕРё РІРѕРїСЂРѕСЃС‹ РІ РѕРєРЅРµ РїРѕРјРѕС‰Рё
 if (isset($_GET['kind']) && 8 == $_GET['kind']) {
     $g_help_id = 202;
 }
 
-// Формируем JS внизу страницы
+// Р¤РѕСЂРјРёСЂСѓРµРј JS РІРЅРёР·Сѓ СЃС‚СЂР°РЅРёС†С‹
 define('JS_BOTTOM', true);
 
-// первым делом запоминаем была ли попытка переключиться на антиюзера или сменить антиюзера
-// иначе при подключении /classes/stdf.php очистится $_POST
-// подробнее тут: #19492
+// РїРµСЂРІС‹Рј РґРµР»РѕРј Р·Р°РїРѕРјРёРЅР°РµРј Р±С‹Р»Р° Р»Рё РїРѕРїС‹С‚РєР° РїРµСЂРµРєР»СЋС‡РёС‚СЊСЃСЏ РЅР° Р°РЅС‚РёСЋР·РµСЂР° РёР»Рё СЃРјРµРЅРёС‚СЊ Р°РЅС‚РёСЋР·РµСЂР°
+// РёРЅР°С‡Рµ РїСЂРё РїРѕРґРєР»СЋС‡РµРЅРёРё /classes/stdf.php РѕС‡РёСЃС‚РёС‚СЃСЏ $_POST
+// РїРѕРґСЂРѕР±РЅРµРµ С‚СѓС‚: #19492
 $switch = (isset($_POST['action']) && 'switch' === $_POST['action']);
 $change_au = (isset($_POST['action']) && 'change_au' === $_POST['action']);
 
@@ -37,14 +37,14 @@ if($_GET['full_site_version'] == 1) {
 
 @$action = strip_tags(trim($_GET['action']));
 if (!$action) @$action = strip_tags(trim($_POST['action']));
-// определяем, был ли сброс массива POST
+// РѕРїСЂРµРґРµР»СЏРµРј, Р±С‹Р» Р»Рё СЃР±СЂРѕСЃ РјР°СЃСЃРёРІР° POST
 if (!$action && ($switch || $change_au)) {
     $action = "switch_error";
 }
 
 switch ($action)
 {
-    case "change_au": // добавляем/изменяем антиюзера.
+    case "change_au": // РґРѕР±Р°РІР»СЏРµРј/РёР·РјРµРЅСЏРµРј Р°РЅС‚РёСЋР·РµСЂР°.
         $response = array();
 
         $location = ($_SESSION['ref_uri'])? HTTP_PFX.$_SERVER["HTTP_HOST"].urldecode($_SESSION['ref_uri']) :  HTTP_PFX.$_SERVER["HTTP_HOST"]."/";
@@ -58,10 +58,10 @@ switch ($action)
         $post_pwd   = stripslashes($_POST['passwd']);
         $anti_login = __paramInit('string',NULL,'a_login');
 
-        // получаем класс антиюзера. Он всегда противоположен классу юзера.
+        // РїРѕР»СѓС‡Р°РµРј РєР»Р°СЃСЃ Р°РЅС‚РёСЋР·РµСЂР°. РћРЅ РІСЃРµРіРґР° РїСЂРѕС‚РёРІРѕРїРѕР»РѕР¶РµРЅ РєР»Р°СЃСЃСѓ СЋР·РµСЂР°.
         $anti_class = is_emp() ? 'freelancer' : 'employer';
         $anti = new $anti_class();
-        // запоминаем данные антиюзера.
+        // Р·Р°РїРѕРјРёРЅР°РµРј РґР°РЅРЅС‹Рµ Р°РЅС‚РёСЋР·РµСЂР°.
         $anti->GetUser($anti_login, true, true);
         $anti_uid = $anti->uid;
         $anti_uname = $anti->uname;
@@ -71,16 +71,16 @@ switch ($action)
         if( !$anti_uid ) {
             echo json_encode(array('success' => false));
             exit;
-        } // т.е. нет юзера с логином $anti_login среди $anti_class.
+        } // С‚.Рµ. РЅРµС‚ СЋР·РµСЂР° СЃ Р»РѕРіРёРЅРѕРј $anti_login СЃСЂРµРґРё $anti_class.
 
-        // сначала изменяем антиюзера у антиюзера (т.е. устанавливаем ему uid текущего юзера в поле anti_uid).
+        // СЃРЅР°С‡Р°Р»Р° РёР·РјРµРЅСЏРµРј Р°РЅС‚РёСЋР·РµСЂР° Сѓ Р°РЅС‚РёСЋР·РµСЂР° (С‚.Рµ. СѓСЃС‚Р°РЅР°РІР»РёРІР°РµРј РµРјСѓ uid С‚РµРєСѓС‰РµРіРѕ СЋР·РµСЂР° РІ РїРѕР»Рµ anti_uid).
         $anti = new $anti_class();
         $anti->anti_uid = $uid;
         if( !$anti->Update($anti_uid, $res, "AND passwd = '".users::hashPasswd(iconv('UTF-8', 'windows-1251', $post_pwd))."'")
             && $res
             && pg_affected_rows($res) )
         {
-          // устанавливаем антиюзера текущему пользователю.
+          // СѓСЃС‚Р°РЅР°РІР»РёРІР°РµРј Р°РЅС‚РёСЋР·РµСЂР° С‚РµРєСѓС‰РµРјСѓ РїРѕР»СЊР·РѕРІР°С‚РµР»СЋ.
           $user_class = is_emp() ? 'employer' : 'freelancer';
           $user = new $user_class();
           $user->anti_uid = $anti_uid;
@@ -103,7 +103,7 @@ switch ($action)
 
         unset($anti, $user, $post_pwd);
     
-    case "switch": // переключаемся на антилогин.
+    case "switch": // РїРµСЂРµРєР»СЋС‡Р°РµРјСЃСЏ РЅР° Р°РЅС‚РёР»РѕРіРёРЅ.
 
         $adCatalog = $_SESSION['toppayed_catalog'];
         $adMain = $_SESSION['toppayed_main'];
@@ -112,12 +112,12 @@ switch ($action)
 
         $uid = get_uid(0);
         $anti_uid = $_SESSION['anti_uid'];
-        // переключаться может только зарегистрированый пользователь и нельзя переключаться на самого себя
+        // РїРµСЂРµРєР»СЋС‡Р°С‚СЊСЃСЏ РјРѕР¶РµС‚ С‚РѕР»СЊРєРѕ Р·Р°СЂРµРіРёСЃС‚СЂРёСЂРѕРІР°РЅС‹Р№ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ Рё РЅРµР»СЊР·СЏ РїРµСЂРµРєР»СЋС‡Р°С‚СЊСЃСЏ РЅР° СЃР°РјРѕРіРѕ СЃРµР±СЏ
         if (!$uid || !$anti_uid || $uid == $anti_uid) {
             $response['success'] = true;
             exit(json_encode($response));
         }
-    case "login":  // логинимся.
+    case "login":  // Р»РѕРіРёРЅРёРјСЃСЏ.
         $_redirect = __paramInit('link', NULL, 'redirect');
         $guest_query = __paramInit('string', null, 'guest_query');
         
@@ -144,7 +144,7 @@ switch ($action)
             $pwd = users::hashPasswd(trim(stripslashes($_POST['passwd'])));
         }
         
-        //Если пусто то даже непробуем авторизоваться
+        //Р•СЃР»Рё РїСѓСЃС‚Рѕ С‚Рѕ РґР°Р¶Рµ РЅРµРїСЂРѕР±СѓРµРј Р°РІС‚РѕСЂРёР·РѕРІР°С‚СЊСЃСЏ
         $is_log = 0;
         if (!empty($s_login) && !empty($pwd)) {
             $is_log = login($s_login, $pwd, $autologin);
@@ -183,17 +183,17 @@ switch ($action)
             } elseif ($is_log == -3) {
                $location = '/denyip.php?login='.$_POST['login'];
             } elseif ($is_log == users::AUTH_STATUS_2FA) {
-               //Редирект на 2ой атап авторизации
+               //Р РµРґРёСЂРµРєС‚ РЅР° 2РѕР№ Р°С‚Р°Рї Р°РІС‚РѕСЂРёР·Р°С†РёРё
                $location = '/auth/second/';
             } else {
                $location = '/remind/?incorrect_login=1';
             }
                         
-            // ##0025730 - Автоматический редирект на создание проекта, если незарег. пользователь нажал кнопку "Опубликовать проект"
+            // ##0025730 - РђРІС‚РѕРјР°С‚РёС‡РµСЃРєРёР№ СЂРµРґРёСЂРµРєС‚ РЅР° СЃРѕР·РґР°РЅРёРµ РїСЂРѕРµРєС‚Р°, РµСЃР»Рё РЅРµР·Р°СЂРµРі. РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ РЅР°Р¶Р°Р» РєРЅРѕРїРєСѓ "РћРїСѓР±Р»РёРєРѕРІР°С‚СЊ РїСЂРѕРµРєС‚"
             $_user_action = (isset($_REQUEST['user_action']) && $_REQUEST['user_action'])?substr(htmlspecialchars($_REQUEST['user_action']), 0, 25):'';
             switch($_user_action) {
               case 'tu':
-                  //@todo: возможно код не используется $redirect_to - неиспользуется
+                  //@todo: РІРѕР·РјРѕР¶РЅРѕ РєРѕРґ РЅРµ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ $redirect_to - РЅРµРёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ
                   $_redirect = trim($_redirect);
                   if($_redirect) {
                       $redirect_to = HTTP_PFX.$_SERVER["HTTP_HOST"].urldecode($_redirect);
@@ -262,7 +262,7 @@ switch ($action)
                $response['success'] = false;
                $response['redir'] = HTTP_PFX . $_SERVER["HTTP_HOST"] . '/denyip.php?login='.$s_login;
             } elseif ($is_log == users::AUTH_STATUS_2FA) {
-               //Редирект на 2ой атап авторизации
+               //Р РµРґРёСЂРµРєС‚ РЅР° 2РѕР№ Р°С‚Р°Рї Р°РІС‚РѕСЂРёР·Р°С†РёРё
                $response['success'] = false;           
                $response['redir'] = HTTP_PFX . $_SERVER['HTTP_HOST'] . '/auth/second/';
             } else {
@@ -306,7 +306,7 @@ switch ($action)
                $threadid = intval(trim($_GET['threadid']));
                $uid = get_uid();
 
-               //messages::SendWarn($_GET["ulogin"],$_GET['blogid'],$_GET['threadid']); - это тут не работает!
+               //messages::SendWarn($_GET["ulogin"],$_GET['blogid'],$_GET['threadid']); - СЌС‚Рѕ С‚СѓС‚ РЅРµ СЂР°Р±РѕС‚Р°РµС‚!
 
                $tprj=new projects();
                $tprj->DeletePublicProject(intval($_GET["prid"]) , get_uid() , hasPermissions('projects'));
@@ -362,7 +362,7 @@ switch ($action)
 }
 
 
-// Для авторизованных пользователей не показываем лендинг, делаем редирект на нужный раздел
+// Р”Р»СЏ Р°РІС‚РѕСЂРёР·РѕРІР°РЅРЅС‹С… РїРѕР»СЊР·РѕРІР°С‚РµР»РµР№ РЅРµ РїРѕРєР°Р·С‹РІР°РµРј Р»РµРЅРґРёРЅРі, РґРµР»Р°РµРј СЂРµРґРёСЂРµРєС‚ РЅР° РЅСѓР¶РЅС‹Р№ СЂР°Р·РґРµР»
 /*if (is_emp()) {
     header('Location: /tu/');
     exit();
@@ -374,7 +374,7 @@ else if (get_uid(false)) {
 
 $rpath="../";
 
-// Дополнительные стили
+// Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Рµ СЃС‚РёР»Рё
 //$css_file[] = "nav.css";
 
 $js_file[] = "tservices/tservices_catalog.js";
@@ -382,26 +382,26 @@ $js_file[] = "tservices/tservices_catalog.js";
 
 $landing_page = true;
 
-// Дополнительный стиль для отображения фона страницы
+// Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Р№ СЃС‚РёР»СЊ РґР»СЏ РѕС‚РѕР±СЂР°Р¶РµРЅРёСЏ С„РѕРЅР° СЃС‚СЂР°РЅРёС†С‹
 $body_additional_class = 'landing-fon';
 
-// Прячем карусель вверху страницы
+// РџСЂСЏС‡РµРј РєР°СЂСѓСЃРµР»СЊ РІРІРµСЂС…Сѓ СЃС‚СЂР°РЅРёС†С‹
 $hide_carouser = true;
 
-// Прячем блок с сообщениями
+// РџСЂСЏС‡РµРј Р±Р»РѕРє СЃ СЃРѕРѕР±С‰РµРЅРёСЏРјРё
 $hide_notification_bar = true;
 
 $header = "../header.php";
 $footer = "../footer.html";
 
 /**
-* Типовые услуги
+* РўРёРїРѕРІС‹Рµ СѓСЃР»СѓРіРё
 **/
 require_once($_SERVER['DOCUMENT_ROOT'] . '/classes/tservices/tservices_binds.php');
 
 $page = 1;
 
-// Количество типовых услуг на главной странице 
+// РљРѕР»РёС‡РµСЃС‚РІРѕ С‚РёРїРѕРІС‹С… СѓСЃР»СѓРі РЅР° РіР»Р°РІРЅРѕР№ СЃС‚СЂР°РЅРёС†Рµ 
 $limit = 12; 
 
 $tserviceModel = TServiceModel::model();
@@ -410,7 +410,7 @@ $freelancerModel = FreelancerModel::model();
 $tservicesCatalogModel = new tservices_catalog();
 $tservicesCatalogModel->setPage($limit, $page);
 
-//Сначала берем закрепленные
+//РЎРЅР°С‡Р°Р»Р° Р±РµСЂРµРј Р·Р°РєСЂРµРїР»РµРЅРЅС‹Рµ
 $tservices_binded = $tservicesCatalogModel->getBindedList(tservices_binds::KIND_LANDING);
 $binded_ids = array();
 if (count($tservices_binded)) {
@@ -419,12 +419,12 @@ if (count($tservices_binded)) {
         $binded_ids[] = $tservice['id'];
     }
     
-    // расширение сведений о типовых услугах
+    // СЂР°СЃС€РёСЂРµРЅРёРµ СЃРІРµРґРµРЅРёР№ Рѕ С‚РёРїРѕРІС‹С… СѓСЃР»СѓРіР°С…
     $tserviceModel
         ->extend($tservices_binded, 'id')
-        ->readVideos($tservices_binded, 'videos', 'videos'); // во всех строках "распаковать" массив видео-клипов
+        ->readVideos($tservices_binded, 'videos', 'videos'); // РІРѕ РІСЃРµС… СЃС‚СЂРѕРєР°С… "СЂР°СЃРїР°РєРѕРІР°С‚СЊ" РјР°СЃСЃРёРІ РІРёРґРµРѕ-РєР»РёРїРѕРІ
 
-    // расширение сведений о пользователях
+    // СЂР°СЃС€РёСЂРµРЅРёРµ СЃРІРµРґРµРЅРёР№ Рѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏС…
     $freelancerModel->extend($tservices_binded, 'user_id', 'user');
 }
 
@@ -432,19 +432,19 @@ if (count($tservices_binded)) {
 $popups = array();
 $tservices_search = array();
 
-if (count($tservices_binded) < $limit) { //Есть места для отображения незакрепленных услуг
-    // поиск записей
+if (count($tservices_binded) < $limit) { //Р•СЃС‚СЊ РјРµСЃС‚Р° РґР»СЏ РѕС‚РѕР±СЂР°Р¶РµРЅРёСЏ РЅРµР·Р°РєСЂРµРїР»РµРЅРЅС‹С… СѓСЃР»СѓРі
+    // РїРѕРёСЃРє Р·Р°РїРёСЃРµР№
     $tservicesCatalogModel->setPage($limit, $page);
     $list = $tservicesCatalogModel->cache(300)->getList();
     $tservices_search = $list['list'];
     $total = $list['total'];
 
-    // расширение сведений о типовых услугах
+    // СЂР°СЃС€РёСЂРµРЅРёРµ СЃРІРµРґРµРЅРёР№ Рѕ С‚РёРїРѕРІС‹С… СѓСЃР»СѓРіР°С…
     $tserviceModel
         ->extend($tservices_search, 'id')
-        ->readVideos($tservices_search, 'videos', 'videos'); // во всех строках "распаковать" массив видео-клипов
+        ->readVideos($tservices_search, 'videos', 'videos'); // РІРѕ РІСЃРµС… СЃС‚СЂРѕРєР°С… "СЂР°СЃРїР°РєРѕРІР°С‚СЊ" РјР°СЃСЃРёРІ РІРёРґРµРѕ-РєР»РёРїРѕРІ
 
-    // расширение сведений о пользователях
+    // СЂР°СЃС€РёСЂРµРЅРёРµ СЃРІРµРґРµРЅРёР№ Рѕ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏС…
     $freelancerModel->extend($tservices_search, 'user_id', 'user');
 }
 
@@ -474,7 +474,7 @@ if ($uid && !is_emp()) {
     
     $isExistsBindUp = false;
     
-    //Добавляем попапы продления и поднятия к услугам текущего юзера
+    //Р”РѕР±Р°РІР»СЏРµРј РїРѕРїР°РїС‹ РїСЂРѕРґР»РµРЅРёСЏ Рё РїРѕРґРЅСЏС‚РёСЏ Рє СѓСЃР»СѓРіР°Рј С‚РµРєСѓС‰РµРіРѕ СЋР·РµСЂР°
     foreach ($tservices as $key=>$tservice) {
         $is_owner = $tservice['user_id'] == $uid;
         if ($is_owner) {
@@ -532,15 +532,15 @@ $suffix = $uid <= 0? '_anon' : (is_emp()? '_emp' : '_frl');
 $content_landing_image = $_SERVER['DOCUMENT_ROOT']."/templates/landings/tpl.landing_image{$suffix}.php";
 $content = $_SERVER['DOCUMENT_ROOT']."/templates/landings/tpl.landing_tservices.php";
 
-// Список профессий
+// РЎРїРёСЃРѕРє РїСЂРѕС„РµСЃСЃРёР№
 $prfs = new professions();
 $profs = $prfs->GetAllProfessions("",0, 1);
 
-// Сортировка категорий профессий по названию
+// РЎРѕСЂС‚РёСЂРѕРІРєР° РєР°С‚РµРіРѕСЂРёР№ РїСЂРѕС„РµСЃСЃРёР№ РїРѕ РЅР°Р·РІР°РЅРёСЋ
 //usort($profs, function($a, $b) { return strcmp($a['groupname'], $b['groupname']);});
 
-$page_title = 'Фриланс сайт удаленной работы №1. Фрилансеры, работа на дому, freelance : FL.ru';
+$page_title = 'Р¤СЂРёР»Р°РЅСЃ СЃР°Р№С‚ СѓРґР°Р»РµРЅРЅРѕР№ СЂР°Р±РѕС‚С‹ в„–1. Р¤СЂРёР»Р°РЅСЃРµСЂС‹, СЂР°Р±РѕС‚Р° РЅР° РґРѕРјСѓ, freelance : FL.ru';
 
-// отрисовка страницы
+// РѕС‚СЂРёСЃРѕРІРєР° СЃС‚СЂР°РЅРёС†С‹
 include ($_SERVER['DOCUMENT_ROOT']."/template3.php");    
 
